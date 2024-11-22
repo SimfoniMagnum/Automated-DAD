@@ -93,7 +93,15 @@ def save_master_file_excel():
             time_str = datetime.now().strftime('%H-%M-%S-%f')  # '%H-%M-%S-%f' formats time in a safe way
             filename = f'Master File {time_str}.xlsx'
             st.session_state.master_file.to_excel(filename, index=False)
+            with open(filename, 'rb') as file:
+                file_data = file.read()
             st.success(f"Master File Saved Successfully", icon='🎊')
+            st.download_button(
+                label="Download Excel file",
+                data=file_data,
+                file_name=filename,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
         except Exception as e:
             st.error(f"{e} Error Occured")
 
