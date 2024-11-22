@@ -102,6 +102,7 @@ def save_master_file_excel():
                 file_name=filename,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+            return 
         except Exception as e:
             st.error(f"{e} Error Occured")
 
