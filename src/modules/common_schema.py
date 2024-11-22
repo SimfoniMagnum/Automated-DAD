@@ -86,25 +86,35 @@ def read_raw_data_common_schema_em():
                 st.error(f'{e} Error Occured While Opening Mapping File')
 
 
+import streamlit as st
+from datetime import datetime
+
 @st.dialog("Saving File", width='large')
 def save_master_file_excel():
     with st.spinner('Please wait while we save file....'):
-        try:
-            time_str = datetime.now().strftime('%H-%M-%S-%f')  # '%H-%M-%S-%f' formats time in a safe way
-            filename = f'Master File {time_str}.xlsx'
-            st.session_state.master_file.to_excel(filename, index=False)
-            with open(filename, 'rb') as file:
-                file_data = file.read()
-            st.success(f"Master File Saved Successfully", icon='🎊')
+        if "file_saved" not in st.session_state:
+            try:
+                time_str = datetime.now().strftime('%H-%M-%S-%f')
+                filename = f'Master File {time_str}.xlsx'
+                st.session_state.master_file.to_excel(filename, index=False)
+                with open(filename, 'rb') as file:
+                    file_data = file.read()
+                st.session_state.file_saved = {
+                    "filename": filename,
+                    "data": file_data
+                }
+                st.success("Master File Saved Successfully", icon='🎊')
+            except Exception as e:
+                st.error(f"{e} Error Occurred")
+                return
+        if "file_saved" in st.session_state:
             st.download_button(
                 label="Download Excel file",
-                data=file_data,
-                file_name=filename,
+                data=st.session_state.file_saved["data"],
+                file_name=st.session_state.file_saved["filename"],
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-            return 
-        except Exception as e:
-            st.error(f"{e} Error Occured")
+
 
 
 @st.dialog('Create Master File', width='small')
