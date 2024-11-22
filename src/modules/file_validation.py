@@ -3,7 +3,7 @@ import polars as pl
 import pandas as pd
 import time
 import re
-
+pd.set_option('display.float_format', '{:.2f}'.format)
 
 @st.dialog('Loading File')
 def load_file():
@@ -119,7 +119,7 @@ def began_analysis():
                     df[column] = df[column].apply(check_content)
                     na_count = df[column].isna().sum()
                     percentage_na = ((total_transaction - na_count) / total_transaction) * 100
-                    result[column] = {'Percentage Population': percentage_na, 'Comment': None,
+                    result[column] = {'Percentage Population': f'{percentage_na}%', 'Comment': None,
                                       'Blank Rows Count': na_count,
                                       'Column Type': 'Important'}
 
@@ -143,7 +143,7 @@ def began_analysis():
                     out_of_range_percent = ((total_transaction - out_of_range) / total_transaction) * 100
                     result[date_col] = {
                         'Percentage Population': out_of_range_percent,
-                        'Comment': f'Total {out_of_range} Outlier Document Dates found in Data',
+                        'Comment': f'{out_of_range} Outlier Document Dates found in Data',
                         'Blank Rows Count': out_of_range,
                         'Column Type': 'Important'
                     }
@@ -183,7 +183,7 @@ def began_analysis():
                     percentage_spend_na = ((total_transaction - no_spend) / total_transaction) * 100
                     result[key] = {
                         'Percentage Population': percentage_spend_na,
-                        'Comment': f'Total negative Spend {negative_spend} and Positive Spend {positive_spend} and Total Outliers Spend is {total_outlier_spend}',
+                        'Comment': f'Total negative Spend {negative_spend:,} and Positive Spend {positive_spend:,} and Total Outliers Spend is {total_outlier_spend:,}',
                         'Blank Rows Count': no_spend,
                         'Column Type': 'Important'
                     }
@@ -224,11 +224,14 @@ def began_analysis():
             if column not in list(st.session_state.mapping_dict.values()):
                 nas = df[column].isna().sum()
                 percentage = ((total_transaction - nas) / total_transaction) * 100
-                result[column] = {'Percentage Population': percentage, 'Comment': None,
+                result[column] = {'Percentage Population': f'{percentage}%', 'Comment': None,
                                   'Blank Rows Count': nas,
                                   'Column Type': 'Good to have'}
         st.session_state.result_df = pd.DataFrame.from_records(result)
         st.session_state.result_df = st.session_state.result_df.transpose()
+        st.session_state.result_df['Percentage Population'] = st.session_state.result_df['Percentage Population'].apply(lambda x: str(x).split('.')[0])
+        st.session_state.result_df['Percentage Population'] = st.session_state.result_df['Percentage Population'].astype(str) + ['%']
+        print(st.session_state.result_df.sample(5))
         st.session_state.result_df.reset_index(inplace=True)
         st.session_state['analysis_status'] = True
         st.success('Results Calculated Navigate to next page to checks the results!', icon='🎉')
